@@ -1,0 +1,22 @@
+{
+  "name": "fullstackx",
+  "version": "1.0.0",
+  "description": "a node project for authentication",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "author": "Kamal",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.4",
+    "express": "^5.2.1",
+    "mongoose": "^9.10.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
