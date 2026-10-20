@@ -1,6 +1,8 @@
 import User from "../model/User.model.js"
 import crypto from "crypto"
 import nodemailer from "nodemailer";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken"
 
 const registerUser= async (req,res)=>{
 
@@ -127,7 +129,92 @@ const verifyUser =async (req,res)=>{
     })
 }
 
+
+const login=async (req,res)=>{
+
+     //get the data
+    const {email,password}=req.body;
+
+    if(!email||!password){
+        return res.status(400).json({
+            message:"All fileds are required"
+        })
+    }
+    try {
+        // check if the user exist
+       const user= await User.findOne({
+            email
+        })
+        //if no user exist
+        if(!user){
+            return res.status(400).json({
+                message:"No User found with the email"
+            })
+        }
+    // hash the password to compare & check the password maches to password in database
+   const isMatch= await bcrypt.compare(password,user.password);
+   
+    console.log(isMatch)
+
+    if(!isMatch){
+        return res.status(400).json({
+            message:"Invalid email or password"
+        })
+    }
+
+    if(!user.isVerified){
+        return res.status(400).json({
+            message:"User email not verified"
+        })
+    }
+    
+
+    //generate a jwt session token
+   const token= jwt.sign({
+        id:user._id,
+        role:user.role,
+    },
+    process.env.TOKEN_SECRET,
+    {
+        expiresIn:'24h'
+    }
+)
+
+
+ //send the token to client as cookies
+const cookieOptions={
+    httpOnly:true,
+    secure:true,
+    maxAge:24*60*60*1000,
+}
+   res.cookie("sessionToken",token,cookieOptions)
+   res.status(200).json({
+    message:"Login successful",
+    success:true,
+    token,
+    user:{
+        id:user._id,
+        name:user.name,
+        role:user.role
+    }
+   })
+   
+
+    
+        
+    } catch (error) {
+        return res.status(400).json({
+            message:"Login not successfull",
+            error,
+            success:false
+        })
+    }
+    
+
+}
+
 export {
     registerUser,
-    verifyUser
+    verifyUser,
+    login
 }
