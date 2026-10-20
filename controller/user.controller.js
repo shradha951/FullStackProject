@@ -57,7 +57,7 @@ const registerUser= async (req,res)=>{
         auth:{
             user:process.env.MAILTRAP_USER,
             pass:process.env.MAILTRAP_PASSWORD,
-        }
+        },
     })
 
 
@@ -79,10 +79,6 @@ const registerUser= async (req,res)=>{
         success:true,
       })
 
-    
-
-
-
 
     } catch (error) {
 
@@ -94,27 +90,44 @@ const registerUser= async (req,res)=>{
         })
         
     }
-   
-
-   
-
-
-
-    
-
-   
-
-    
-
-    
-
-  
-
-
-   // res.send('registered!');
+ // res.send('registered!');
 };
 
 
+const verifyUser =async (req,res)=>{
+    //get token from the url
+    const {token}=req.params
+    //validate
+    console.log(token);
+    if(!token){
+        return res.status(400).json({
+            message:"Invalid token"
+        })
+    }
+    // find user based on token
+   const user = await User.findOne({
+        verificationToken:token
+    })
+    //if not 
+    if(!user){
+        return res.status(404).json({
+            message:"Invalid token"
+        })
+    }
+    // isVerified token to true
+    user.isVerified=true;
+    // remove the verification token
+    user.verificationToken=undefined;
+    //save 
+    await user.save();
+    //return response
+
+    return res.status(200).json({
+        message:"User successfully verified"
+    })
+}
+
 export {
-    registerUser
+    registerUser,
+    verifyUser
 }
