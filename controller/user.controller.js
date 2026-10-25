@@ -242,9 +242,19 @@ const getMe = async (req, res) => {
 
 const logoutUser=async (req,res)=>{
     try {
-        
+        res.cookie("sessionToken","",{
+            expires:new Date(0)
+        })
+
+        res.status(200).json({
+            success:true,
+            message:"Logged out successfully"
+        })
     } catch (error) {
-        
+        return res.status(400).json({
+            success:false,
+            message:"Not able to logout"
+        })
     }
 }
 
