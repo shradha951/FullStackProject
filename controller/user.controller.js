@@ -67,7 +67,7 @@ const registerUser= async (req,res)=>{
         from:process.env.MAILTRAP_SENDEREMAIL,
         to:user.email,
         subject:"Verify you email",
-        text:`please click on the following link:${process.env.BASEURL}/api/v1/users/verify/${token}`
+        text:`please click on the following link:${process.env.BASE_URL}/api/v1/users/verify/${token}`
     }
 
 
@@ -133,7 +133,7 @@ const verifyUser =async (req,res)=>{
 const login=async (req,res)=>{
 
      //get the data
-    const {email,password}=req.body;
+    const {email,password}=req.body || {};
 
     if(!email||!password){
         return res.status(400).json({
@@ -213,8 +213,54 @@ const cookieOptions={
 
 }
 
+
+
+
+const getMe=async (req,res)=>{
+    try {
+        return res.status(200).json({
+            message:"you found me"
+        })
+    } catch (error) {
+        
+    }
+}
+
+
+const logoutUser=async (req,res)=>{
+    try {
+        
+    } catch (error) {
+        
+    }
+}
+
+
+const forgotPassword=async (req,res)=>{
+    try {
+        
+    } catch (error) {
+        
+    }
+}
+
+
+const resetPassword=async (req,res)=>{
+    try {
+        
+    } catch (error) {
+        
+    }
+}
+
+
+
 export {
     registerUser,
     verifyUser,
-    login
+    login,
+    getMe,
+    logoutUser,
+    forgotPassword,
+    resetPassword
 }
