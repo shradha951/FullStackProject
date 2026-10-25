@@ -216,16 +216,29 @@ const cookieOptions={
 
 
 
-const getMe=async (req,res)=>{
-    try {
-        return res.status(200).json({
-            message:"you found me"
-        })
-    } catch (error) {
-        
-    }
-}
+const getMe = async (req, res) => {
+  try {
+    console.log("JWT user:", req.user);
+    console.log("User ID:", req.user?.id);
 
+    const user = await User.findById(req.user.id);
+
+    console.log("Database user:", user);
+
+    return res.status(200).json({
+      success: true,
+      message: "Hello",
+      user
+    });
+  } catch (error) {
+    console.error("getMe failed:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 
 const logoutUser=async (req,res)=>{
     try {

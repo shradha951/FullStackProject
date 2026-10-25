@@ -30,7 +30,8 @@ export const isLoggedIn=async (req,res,next)=>{
             success:false,
             message:"Internal server error"
         })
+        
     }
 
-    next();
+    //next();
 }
