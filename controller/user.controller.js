@@ -261,15 +261,99 @@ const logoutUser=async (req,res)=>{
 
 const forgotPassword=async (req,res)=>{
     try {
+        //get email from body
+        const {email}=req.body || {};
+
+        if(!email){
+             return res.status(404).json({
+                success:false,
+                message:"All fields are required"
+            })
+        }
+        const user= await User.findOne({
+            email
+        })
+
+        if(!user){
+            return res.status(404).json({
+                success:false,
+                message:"No such user found with this email"
+            })
+        }
+
+        if(!user.isVerified){
+            return res.status(400).json({
+                success:false,
+                message:"User not verified"
+            })
+        }
+
+        const token=crypto.randomBytes(32).toString('hex');
+        const tokenExpiry= Date.now()+10*60*1000;
+
+        user.resetPasswordToken=token;
+        user.resetPasswordExpires=tokenExpiry
+
+        await user.save();
+
+        //find user based on email
+        //reset token + reset expiry -> Date.now()+10*60*1000=>user.save()
+        //send email => design url
+
+        const transporter =nodemailer.createTransport({
+        host:process.env.MAILTRAP_HOST,
+        port:process.env.MAILTRAP_PORT,
+        secure:false,
+        auth:{
+            user:process.env.MAILTRAP_USER,
+            pass:process.env.MAILTRAP_PASSWORD,
+        },
+    })
+
+
+    const mailOptions={
+        from:process.env.MAILTRAP_SENDEREMAIL,
+        to:user.email,
+        subject:"Clin on the Link to Reset Passsword",
+        text:`please click on the following link:${process.env.BASE_URL}/api/v1/users/resetpassword/${token}`
+    }
+
+    const info = await transporter.sendMail(mailOptions);
+
+    res.status(201).json({
+        success:true,
+        message:"Reset email successfulyy send"
+    })
+
         
     } catch (error) {
-        
+        res.status(500).json({
+                success:false,
+                message:"Not able to send the reset email "
+            })
     }
 }
 
 
 const resetPassword=async (req,res)=>{
     try {
+        //collect token from params
+        // password from request.body
+        const {resetToken}=req.params;
+        const {password, confPassword}=req.body;
+
+        try {
+          const user= await  User.findOne({
+                resetPasswordToken:resetToken,
+                resetPasswordExpires:{$gt:Date.now()}
+            })
+
+            //set password in user
+            // resetToken and resetExpirt  to empty
+            // save
+        } catch (error) {
+        }
+
         
     } catch (error) {
         
