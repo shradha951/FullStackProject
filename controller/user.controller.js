@@ -221,7 +221,7 @@ const getMe = async (req, res) => {
     console.log("JWT user:", req.user);
     console.log("User ID:", req.user?.id);
 
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select('-password');
 
     console.log("Database user:", user);
 
@@ -340,23 +340,69 @@ const resetPassword=async (req,res)=>{
         //collect token from params
         // password from request.body
         const {resetToken}=req.params;
+        if(!resetToken){
+            return res.status(400).json({
+                success:false,
+                message:"No password token or Password token expired"
+            })
+        }
         const {password, confPassword}=req.body;
 
+        if(!password || !confPassword){
+            return res.status(400).json({
+                success:false,
+                message:"All fields are required"
+            })
+        }
+
+
+        if(password !== confPassword){
+            return res.status(400).json({
+                success:false,
+                message:"Both field must be same"
+            })
+        }
         try {
           const user= await  User.findOne({
                 resetPasswordToken:resetToken,
                 resetPasswordExpires:{$gt:Date.now()}
             })
 
+            if(!user){
+                return res.status(400).json({
+                    success:false,
+                    message:"Invalid token or Link expired"
+                })
+            }
+
+
             //set password in user
+            user.password=password
+            user.resetPasswordToken=undefined;
+            user.resetPasswordExpires=undefined;
+            await user.save();
+
+            res.status(200).json({
+                success:true,
+                message:"password reset sucessfully"
+            })
             // resetToken and resetExpirt  to empty
             // save
         } catch (error) {
+            return res.status(400).json({
+                success:false,
+                message:"Error in validating token and password",
+                error
+            })
         }
 
         
     } catch (error) {
-        
+        return res.status(400).json({
+            success:false,
+            message:"Cannot reset password",
+            error
+        })
     }
 }
 
