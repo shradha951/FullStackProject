@@ -339,14 +339,14 @@ const resetPassword=async (req,res)=>{
     try {
         //collect token from params
         // password from request.body
-        const {resetToken}=req.params;
+        const {resetToken}=req.params || {};
         if(!resetToken){
             return res.status(400).json({
                 success:false,
                 message:"No password token or Password token expired"
             })
         }
-        const {password, confPassword}=req.body;
+        const {password, confPassword}=req.body || {};
 
         if(!password || !confPassword){
             return res.status(400).json({
